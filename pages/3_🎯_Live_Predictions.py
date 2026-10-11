@@ -105,7 +105,7 @@ def fetch_latest_news_sentiment() -> pd.DataFrame | None:
         r = requests.get(
             NEWS_URL,
             timeout=60,
-            headers={"User-Agent": "btc-llm-sentiment/1.0 (+https://github.com/nassim0014/btc-llm-sentiment)"},
+            headers={"User-Agent": "btc-llm-sentiment/1.0 (+https://github.com/Kinz-org/btc-llm-sentiment)"},
         )
         r.raise_for_status()
         news = pd.read_csv(StringIO(r.text))

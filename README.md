@@ -11,16 +11,16 @@
     <img src="https://static.streamlit.io/badges/streamlit_badge_black_white.svg" alt="Open in Streamlit">
   </a>
   &nbsp;
-  <a href="https://colab.research.google.com/github/nassim0014/btc-llm-sentiment/blob/main/notebooks/Master_Pipeline.ipynb">
+  <a href="https://colab.research.google.com/github/Kinz-org/btc-llm-sentiment/blob/main/notebooks/Master_Pipeline.ipynb">
     <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open Phase 1 in Colab">
   </a>
   &nbsp;
-  <a href="https://colab.research.google.com/github/nassim0014/btc-llm-sentiment/blob/main/notebooks/Master_Pipeline_Phase2.ipynb">
+  <a href="https://colab.research.google.com/github/Kinz-org/btc-llm-sentiment/blob/main/notebooks/Master_Pipeline_Phase2.ipynb">
     <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open Phase 2 in Colab">
   </a>
   &nbsp;
-  <a href="https://github.com/nassim0014/btc-llm-sentiment/actions/workflows/ci.yml">
-    <img src="https://github.com/nassim0014/btc-llm-sentiment/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
+  <a href="https://github.com/Kinz-org/btc-llm-sentiment/actions/workflows/ci.yml">
+    <img src="https://github.com/Kinz-org/btc-llm-sentiment/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
   </a>
   &nbsp;
   <img src="https://img.shields.io/badge/python-3.11%20%7C%203.12-blue" alt="Python 3.11 / 3.12">
@@ -87,8 +87,8 @@ Click a badge below to open a Master Pipeline notebook in Colab. The first cell 
 
 | Notebook | What it runs | Runtime | Open in Colab |
 |----------|--------------|---------|---------------|
-| **Master_Pipeline.ipynb** (Phase 1) | Data → Sentiment → Features → LSTM → Backtest | ~3 min (TextBlob) / ~7 min (FinBERT T4) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nassim0014/btc-llm-sentiment/blob/main/notebooks/Master_Pipeline.ipynb) |
-| **Master_Pipeline_Phase2.ipynb** (Phase 2) | Walk-Forward CV → Optuna → Risk-Managed Backtest → SHAP | ~15-25 min (T4 GPU) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nassim0014/btc-llm-sentiment/blob/main/notebooks/Master_Pipeline_Phase2.ipynb) |
+| **Master_Pipeline.ipynb** (Phase 1) | Data → Sentiment → Features → LSTM → Backtest | ~3 min (TextBlob) / ~7 min (FinBERT T4) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Kinz-org/btc-llm-sentiment/blob/main/notebooks/Master_Pipeline.ipynb) |
+| **Master_Pipeline_Phase2.ipynb** (Phase 2) | Walk-Forward CV → Optuna → Risk-Managed Backtest → SHAP | ~15-25 min (T4 GPU) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Kinz-org/btc-llm-sentiment/blob/main/notebooks/Master_Pipeline_Phase2.ipynb) |
 
 **Typical Colab workflow:**
 1. Open `Master_Pipeline.ipynb` in Colab → Runtime → Run all → get Phase 1 outputs in 3 min.
@@ -98,7 +98,7 @@ Click a badge below to open a Master Pipeline notebook in Colab. The first cell 
 ### Path B - Local (clone + venv)
 
 ```bash
-git clone https://github.com/nassim0014/btc-llm-sentiment.git
+git clone https://github.com/Kinz-org/btc-llm-sentiment.git
 cd btc-llm-sentiment
 
 # Option 1: Use the Makefile (recommended)
@@ -375,7 +375,7 @@ Both notebooks have built-in memory cleanup between stages, so they won't hit OO
 
 ```bash
 # Clone
-git clone https://github.com/nassim0014/btc-llm-sentiment.git
+git clone https://github.com/Kinz-org/btc-llm-sentiment.git
 cd btc-llm-sentiment
 
 # Option 1: Makefile (recommended)
@@ -473,7 +473,7 @@ pytest tests/ -v
 - **Lightweight**: test job only installs `numpy pandas scikit-learn pytest ruff bandit` (skips heavy ML deps - the test suite exercises pure-Python backtest + CV logic only)
 - **SARIF**: trivy + gitleaks results uploaded to the GitHub Security tab
 
-[![CI](https://github.com/nassim0014/btc-llm-sentiment/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/nassim0014/btc-llm-sentiment/actions/workflows/ci.yml)
+[![CI](https://github.com/Kinz-org/btc-llm-sentiment/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Kinz-org/btc-llm-sentiment/actions/workflows/ci.yml)
 
 ---
 
@@ -525,6 +525,6 @@ If this code contributes to published research, please cite the repository.
   title  = {BTC Sentiment-Driven LSTM Trading Pipeline},
   author = {Nassim K.},
   year   = {2026},
-  url    = {https://github.com/nassim0014/btc-llm-sentiment}
+  url    = {https://github.com/Kinz-org/btc-llm-sentiment}
 }
 ```
