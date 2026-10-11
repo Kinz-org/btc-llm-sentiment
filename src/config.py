@@ -40,7 +40,7 @@ BUNDLE_PATHS = [
 # ────────────────────────────────────────────────────────────
 # Hosted on GitHub raw - used by the Streamlit app, the sentiment alert
 # cron job, and the pipeline runner when the local file is missing.
-NEWS_URL = "https://raw.githubusercontent.com/nassim0014/btc-llm-sentiment/main/Data/cryptonews.csv"
+NEWS_URL = "https://raw.githubusercontent.com/Kinz-org/btc-llm-sentiment/main/Data/cryptonews.csv"
 
 # yfinance ticker for BTC-USD
 BTC_TICKER = "BTC-USD"
@@ -53,7 +53,7 @@ REQUEST_MAX_RETRIES = 3
 REQUEST_BACKOFF_FACTOR = 1.5  # seconds, multiplied per retry
 
 # HTTP User-Agent - some CDNs block the python-requests default UA.
-USER_AGENT = "btc-llm-sentiment/1.0 (+https://github.com/nassim0014/btc-llm-sentiment)"
+USER_AGENT = "btc-llm-sentiment/1.0 (+https://github.com/Kinz-org/btc-llm-sentiment)"
 
 # ────────────────────────────────────────────────────────────
 # Model artifact integrity (defense against tampered pickle files)

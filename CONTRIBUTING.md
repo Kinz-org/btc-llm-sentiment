@@ -19,7 +19,7 @@ By participating you agree to abide by the [Code of Conduct](./CODE_OF_CONDUCT.m
 ## Development Setup
 
 ```bash
-git clone https://github.com/nassim0014/btc-llm-sentiment.git
+git clone https://github.com/Kinz-org/btc-llm-sentiment.git
 cd btc-llm-sentiment
 
 # Option 1: Makefile (recommended)

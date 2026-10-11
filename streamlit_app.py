@@ -124,7 +124,7 @@ def fetch_live_sentiment() -> Optional[dict]:
         from io import StringIO
         import ast
 
-        NEWS_URL = "https://raw.githubusercontent.com/nassim0014/btc-llm-sentiment/main/Data/cryptonews.csv"
+        NEWS_URL = "https://raw.githubusercontent.com/Kinz-org/btc-llm-sentiment/main/Data/cryptonews.csv"
         r = requests.get(NEWS_URL, timeout=30)
         r.raise_for_status()
         news = pd.read_csv(StringIO(r.text))

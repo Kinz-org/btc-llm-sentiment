@@ -56,7 +56,7 @@ OUTPUTS = ROOT / "outputs"
 INTERIM.mkdir(parents=True, exist_ok=True)
 OUTPUTS.mkdir(parents=True, exist_ok=True)
 
-NEWS_URL = "https://raw.githubusercontent.com/nassim0014/btc-llm-sentiment/main/Data/cryptonews.csv"
+NEWS_URL = "https://raw.githubusercontent.com/Kinz-org/btc-llm-sentiment/main/Data/cryptonews.csv"
 LOCAL_NEWS = DATA_DIR / "cryptonews.csv"
 
 BTC_TICKER = "BTC-USD"
@@ -82,7 +82,7 @@ def fetch_news() -> pd.DataFrame:
             r = requests.get(
                 NEWS_URL,
                 timeout=120,
-                headers={"User-Agent": "btc-llm-sentiment/1.0 (+https://github.com/nassim0014/btc-llm-sentiment)"},
+                headers={"User-Agent": "btc-llm-sentiment/1.0 (+https://github.com/Kinz-org/btc-llm-sentiment)"},
             )
             r.raise_for_status()
             df = pd.read_csv(StringIO(r.text))
