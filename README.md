@@ -124,7 +124,7 @@ This pipeline goes beyond a basic LSTM classifier. Five production-grade upgrade
 **`src/cv/walk_forward.py`** - 5 expanding-window folds (400→460→520→580→640 training days, 60-day validation windows). Strict temporal ordering - no look-ahead leakage. Logs per-fold OOF metrics (Sharpe, Accuracy, F1, AUC, Max DD). The std of OOF Sharpe is the key regime-stability indicator.
 
 ### 2. Optuna Hyperparameter Optimization
-**`src/cv/optuna_search.py`** - replaces the manual 4-config grid with Optuna random search:
+**`src/cv/optuna_search.py`** - replaces the manual 4-config grid with an Optuna search (seeded `TPESampler`):
 - **Search space**: `lr` (log-uniform 1e-4 to 1e-2), `units` (32/64/128), `dropout` (0.0/0.2/0.4), `num_layers` (1/2)
 - **Objective**: maximize mean OOF Sharpe across 5 walk-forward folds
 - **Pruning**: `MedianPruner` kills trials whose cumulative OOF Sharpe is below the median after fold 2
@@ -218,7 +218,7 @@ flowchart LR
 | Interpretability   | `shap` (KernelExplainer with DeepExplainer fallback)        | 2     |
 | Visualization      | `matplotlib`, `seaborn`                                     | 1 + 2 |
 | Interactive dashboard | `streamlit`, `plotly` (dark mode, multi-page)            | -     |
-| Testing            | `pytest` (15 unit tests)                                    | -     |
+| Testing            | `pytest` (unit tests in `tests/`)                           | -     |
 | CI/CD              | GitHub Actions (Python 3.11 + 3.12 matrix)                  | -     |
 
 ---
@@ -233,7 +233,7 @@ btc-llm-sentiment/
 ├── conftest.py                                 # pytest config (makes src/ importable)
 ├── streamlit_app.py                            # 🖥️ Streamlit dashboard entry point
 ├── .streamlit/config.toml                      # dark mode theme config
-├── .github/workflows/test.yml                  # CI: syntax check + pytest on push
+├── .github/workflows/ci.yml                    # CI: lint, SAST, pytest, ML smoke, security scans, Docker build
 ├── Data/
 │   ├── cryptonews.csv                          # 31,037 headlines
 │   └── bitcoin_sentiments_21_24.csv
@@ -253,7 +253,9 @@ btc-llm-sentiment/
 │       └── 10_shap_interpretability.ipynb
 ├── pages/                                      # Streamlit multi-page app
 │   ├── 1_🔬_Phase_1_Deep_Dive.py             # Phase 1 interactive charts
-│   └── 2_🚀_Phase_2_Deep_Dive.py             # Phase 2 interactive charts
+│   ├── 2_🚀_Phase_2_Deep_Dive.py             # Phase 2 interactive charts
+│   ├── 3_🎯_Live_Predictions.py              # live up/down prediction
+│   └── 4_🎛️_Backtest_Simulator.py            # interactive risk-parameter sliders
 ├── src/                                        # Phase 2 modular package
 │   ├── cv/
 │   │   ├── walk_forward.py                     # Expanding-window CV
@@ -273,7 +275,7 @@ btc-llm-sentiment/
 │   ├── run_risk_managed_backtest.py            # Phase 2 backtest runner
 │   └── run_shap_analysis.py                    # Phase 2 SHAP runner
 ├── tests/
-│   └── test_backtest.py                        # 15 pytest unit tests
+│   └── test_*.py                               # pytest unit tests (backtest, CV, display, alerts, pickle safety)
 └── outputs/
     ├── complete_pipeline_summary.svg           # Phase 1 (embedded at top of README)
     ├── final_model_comparison.csv              # Phase 1
@@ -382,7 +384,7 @@ cd btc-llm-sentiment
 make setup    # creates .venv, installs requirements.txt + pytest
 make run      # Phase 1 pipeline (TextBlob sentiment, ~3 min on CPU)
 make phase2   # Phase 2 advanced pipeline (Optuna + Risk + SHAP)
-make test     # pytest suite (15 tests, ~3 sec)
+make test     # pytest suite
 make lint     # syntax-check all Python files
 
 # Option 2: Manual
@@ -426,7 +428,7 @@ Configure via GitHub Secrets (or environment variables locally):
 - **Workflow:** `.github/workflows/sentiment_alert.yml`
 - **Schedule:** Daily at 08:00 UTC (09:00 Africa/Tunis)
 - **Script:** `scripts/sentiment_alert.py`
-- **Log:** `audit/sentiment_alerts.csv` (committed to repo on each alert)
+- **Log:** `audit/sentiment_alerts.csv`, uploaded as a workflow artifact on each run (the workflow no longer commits to the repo)
 
 ### Manual Run
 
@@ -444,7 +446,7 @@ SLACK_WEBHOOK_URL=https://hooks.slack.com/... python3 scripts/sentiment_alert.py
 
 ### Unit Tests
 
-The `tests/test_backtest.py` suite (15 tests, ~3 sec) covers:
+The suite in `tests/` (seven files) includes `tests/test_backtest.py`, which covers:
 
 - **Walk-Forward CV** (5 tests): expanding-window growth, strict temporal ordering, no look-ahead leakage, fold bounds, invalid params
 - **Risk-Managed Backtester** (6 tests): no drawdown on monotonic uptrend, circuit breaker triggers on -25% decline, Kelly sizing scales with confidence, position capped at 1.0, equity starts at 1.0, metrics dict has required keys
@@ -506,7 +508,7 @@ See [`SECURITY.md`](./SECURITY.md) for the full policy and [`MODEL_CARD.md`](./M
 - [ ] Live trading integration with Binance Testnet
 - [ ] Multi-asset extension (ETH, SOL)
 - [ ] Walk-forward optimization with refit frequency
-- [ ] Bayesian hyperparameter search with Optuna TPE
+- [x] ~~Bayesian hyperparameter search with Optuna TPE~~ - `TPESampler` in `src/cv/optuna_search.py`
 
 ---
 
