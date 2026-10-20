@@ -31,7 +31,12 @@ from src.config import (
     find_bundle,
     find_model,
 )
-from src.utils.safe_pickle import SafePickleError, safe_load_bundle
+from src.utils.safe_pickle import (
+    SafePickleError,
+    file_sha256,
+    safe_load_bundle,
+    safe_load_pickle,
+)
 
 # ────────────────────────────────────────────────────────────
 # 1. Centralized config
@@ -155,6 +160,67 @@ def test_restricted_unpickler_blocks_eval(tmp_path):
     with pytest.raises(SafePickleError) as exc_info:
         safe_load_bundle(path=malicious_path, skip_integrity_check=True)
     assert "Blocked attempt to import" in str(exc_info.value)
+
+
+def test_safe_load_pickle_loads_legitimate_file(tmp_path):
+    """A plain-dict pickle with the right hash loads and round-trips."""
+    payload = {"a": [1, 2.5, "x"], "b": (None, True)}
+    path = tmp_path / "ok.pkl"
+    with path.open("wb") as f:
+        pickle.dump(payload, f)
+
+    assert safe_load_pickle(path, file_sha256(path)) == payload
+
+
+def test_safe_load_pickle_rejects_hash_mismatch(tmp_path):
+    """A wrong expected hash is refused before the file is unpickled."""
+    path = tmp_path / "ok.pkl"
+    with path.open("wb") as f:
+        pickle.dump({"a": 1}, f)
+
+    with pytest.raises(SafePickleError, match="SHA256 mismatch"):
+        safe_load_pickle(path, "0" * 64)
+
+
+def test_safe_load_pickle_blocks_disallowed_class(tmp_path):
+    """Even with a matching hash, a pickle importing os.system is rejected."""
+    import os
+
+    class _Malicious:
+        def __reduce__(self):
+            return (os.system, ("echo pwned",))
+
+    path = tmp_path / "malicious.pkl"
+    with path.open("wb") as f:
+        pickle.dump(_Malicious(), f)
+
+    with pytest.raises(SafePickleError, match="Blocked attempt to import"):
+        safe_load_pickle(path, file_sha256(path))
+
+
+def test_safe_load_pickle_skip_integrity_check_still_restricts(tmp_path):
+    """Skipping the hash check ignores a wrong hash but keeps the allowlist."""
+    import os
+
+    class _Malicious:
+        def __reduce__(self):
+            return (os.system, ("echo pwned",))
+
+    path = tmp_path / "malicious.pkl"
+    with path.open("wb") as f:
+        pickle.dump(_Malicious(), f)
+
+    with pytest.raises(SafePickleError, match="Blocked attempt to import"):
+        safe_load_pickle(path, "0" * 64, skip_integrity_check=True)
+
+
+def test_safe_load_pickle_wraps_corrupt_file(tmp_path):
+    """A file that is not a valid pickle surfaces as SafePickleError."""
+    path = tmp_path / "corrupt.pkl"
+    path.write_bytes(b"not a pickle")
+
+    with pytest.raises(SafePickleError, match="Failed to load"):
+        safe_load_pickle(path, file_sha256(path))
 
 
 def test_restricted_unpickler_allows_legitimate_bundle():
