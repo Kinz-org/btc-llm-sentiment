@@ -204,3 +204,63 @@ def test_model_sha256_matches_pinned_value():
         f"  on-disk is:  {actual}\n"
         f"If you just retrained, update MODEL_SHA256 in src/config.py."
     )
+
+
+# ────────────────────────────────────────────────────────────
+# 3. Generic safe_load_pickle()
+# ────────────────────────────────────────────────────────────
+
+
+def _write_pickle(tmp_path, obj):
+    import pickle
+
+    p = tmp_path / "artifact.pkl"
+    p.write_bytes(pickle.dumps(obj))
+    return p
+
+
+def test_safe_load_pickle_loads_legitimate_file(tmp_path):
+    from src.utils.safe_pickle import file_sha256, safe_load_pickle
+
+    p = _write_pickle(tmp_path, {"a": [1, 2.5, "x"], "b": (None, True)})
+    assert safe_load_pickle(p, file_sha256(p)) == {"a": [1, 2.5, "x"], "b": (None, True)}
+
+
+def test_safe_load_pickle_rejects_hash_mismatch(tmp_path):
+    from src.utils.safe_pickle import safe_load_pickle
+
+    p = _write_pickle(tmp_path, {"a": 1})
+    with pytest.raises(SafePickleError, match="SHA256 mismatch"):
+        safe_load_pickle(p, "0" * 64)
+
+
+def test_safe_load_pickle_rejects_disallowed_class(tmp_path):
+    from src.utils.safe_pickle import file_sha256, safe_load_pickle
+
+    # os.system is outside the allowlist; the unpickler must refuse it
+    # before it is ever resolved, let alone called.
+    class Evil:
+        def __reduce__(self):
+            import os
+
+            return (os.system, ("echo pwned",))
+
+    p = _write_pickle(tmp_path, Evil())
+    with pytest.raises(SafePickleError, match="Blocked attempt to import"):
+        safe_load_pickle(p, file_sha256(p))
+
+
+def test_safe_load_pickle_skip_integrity_check_still_restricts(tmp_path):
+    from src.utils.safe_pickle import safe_load_pickle
+
+    p = _write_pickle(tmp_path, [1, 2, 3])
+    assert safe_load_pickle(p, "0" * 64, skip_integrity_check=True) == [1, 2, 3]
+
+
+def test_safe_load_pickle_wraps_corrupt_file(tmp_path):
+    from src.utils.safe_pickle import file_sha256, safe_load_pickle
+
+    p = tmp_path / "bad.pkl"
+    p.write_bytes(b"not a pickle")
+    with pytest.raises(SafePickleError, match="Failed to load"):
+        safe_load_pickle(p, file_sha256(p))
