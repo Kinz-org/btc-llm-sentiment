@@ -31,7 +31,12 @@ from src.config import (
     find_bundle,
     find_model,
 )
-from src.utils.safe_pickle import SafePickleError, safe_load_bundle
+from src.utils.safe_pickle import (
+    SafePickleError,
+    file_sha256,
+    safe_load_bundle,
+    safe_load_pickle,
+)
 
 # ────────────────────────────────────────────────────────────
 # 1. Centralized config
@@ -204,3 +209,44 @@ def test_model_sha256_matches_pinned_value():
         f"  on-disk is:  {actual}\n"
         f"If you just retrained, update MODEL_SHA256 in src/config.py."
     )
+
+
+# ────────────────────────────────────────────────────────────
+# safe_load_pickle (generic loader)
+# ────────────────────────────────────────────────────────────
+
+
+def test_safe_load_pickle_loads_legitimate_file(tmp_path):
+    """A pickle of allow-listed types loads when the hash matches."""
+    p = tmp_path / "ok.pkl"
+    payload = {"a": [1, 2.5, "x"], "b": (True, None)}
+    p.write_bytes(pickle.dumps(payload))
+    assert safe_load_pickle(p, file_sha256(p)) == payload
+
+
+def test_safe_load_pickle_rejects_hash_mismatch(tmp_path):
+    p = tmp_path / "ok.pkl"
+    p.write_bytes(pickle.dumps({"a": 1}))
+    with pytest.raises(SafePickleError, match="SHA256 mismatch"):
+        safe_load_pickle(p, "0" * 64)
+
+
+def test_safe_load_pickle_blocks_disallowed_class(tmp_path):
+    """Even with a correct hash, a non-allow-listed class is rejected."""
+
+    class Evil:
+        def __reduce__(self):
+            import os
+
+            return (os.system, ("echo pwned",))
+
+    p = tmp_path / "evil.pkl"
+    p.write_bytes(pickle.dumps(Evil()))
+    with pytest.raises(SafePickleError, match="Blocked attempt"):
+        safe_load_pickle(p, file_sha256(p))
+
+
+def test_safe_load_pickle_skip_integrity_check(tmp_path):
+    p = tmp_path / "ok.pkl"
+    p.write_bytes(pickle.dumps([1, 2, 3]))
+    assert safe_load_pickle(p, "0" * 64, skip_integrity_check=True) == [1, 2, 3]
