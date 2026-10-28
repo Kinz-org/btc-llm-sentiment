@@ -54,7 +54,7 @@ Also verified **not actual findings**, so they are not listed below:
   ..., 1.0]`) against the pre-fix code, passing after.
 
 - [x] **`src/utils/safe_pickle.py::safe_load_pickle()` has zero test
-  coverage (done 2026-10-22: five tests in `tests/test_safe_pickle.py`).**
+  coverage (done 2026-10-19).**
 
   This is the generic sibling of `safe_load_bundle()` - same SHA256 +
   restricted-unpickler defense against a tampered pickle running arbitrary
