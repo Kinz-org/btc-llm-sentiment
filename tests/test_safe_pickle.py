@@ -250,3 +250,11 @@ def test_safe_load_pickle_skip_integrity_check(tmp_path):
     p = tmp_path / "ok.pkl"
     p.write_bytes(pickle.dumps([1, 2, 3]))
     assert safe_load_pickle(p, "0" * 64, skip_integrity_check=True) == [1, 2, 3]
+
+
+def test_safe_load_pickle_wraps_corrupt_file(tmp_path):
+    """A file that is not a pickle surfaces as SafePickleError, not a raw error."""
+    p = tmp_path / "bad.pkl"
+    p.write_bytes(b"not a pickle")
+    with pytest.raises(SafePickleError, match="Failed to load"):
+        safe_load_pickle(p, file_sha256(p))
