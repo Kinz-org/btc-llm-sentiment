@@ -385,7 +385,7 @@ make setup    # creates .venv, installs requirements.txt + pytest
 make run      # Phase 1 pipeline (TextBlob sentiment, ~3 min on CPU)
 make phase2   # Phase 2 advanced pipeline (Optuna + Risk + SHAP)
 make test     # pytest suite
-make lint     # syntax-check all Python files
+make lint     # syntax-check all Python files in src/ and scripts/
 
 # Option 2: Manual
 python3 -m venv .venv
@@ -449,11 +449,11 @@ SLACK_WEBHOOK_URL=https://hooks.slack.com/... python3 scripts/sentiment_alert.py
 The suite in `tests/` (seven files) includes `tests/test_backtest.py`, which covers:
 
 - **Walk-Forward CV** (5 tests): expanding-window growth, strict temporal ordering, no look-ahead leakage, fold bounds, invalid params
-- **Risk-Managed Backtester** (6 tests): no drawdown on monotonic uptrend, circuit breaker triggers on -25% decline, Kelly sizing scales with confidence, position capped at 1.0, equity starts at 1.0, metrics dict has required keys
+- **Risk-Managed Backtester** (7 tests): no drawdown on monotonic uptrend, circuit breaker triggers on -25% decline, Kelly sizing scales with confidence, position capped at 1.0, equity starts at 1.0, vol fallback respects target annual vol, metrics dict has required keys
 - **Strategy Comparison** (2 tests): returns all three strategies, Buy & Hold final value matches close ratio
-- **OOF Metrics** (2 tests): perfect predictions yield 1.0 accuracy, random predictions hover near 0.5
+- **OOF Metrics** (8 tests): perfect predictions yield 1.0 accuracy, random predictions hover near 0.5, plus edge cases (single-class AUC, empty/single-element/mismatched inputs, zero-std returns)
 
-Plus `tests/test_safe_pickle.py` (12 tests) covering the safe pickle loader:
+Plus `tests/test_safe_pickle.py` (16 tests) covering the safe pickle loader:
 - Centralized config exposes required constants
 - SHA256 integrity verification (rejects tampered bundles)
 - Restricted unpickler blocks `os.system`, `subprocess.Popen`, `eval`
@@ -471,8 +471,8 @@ pytest tests/ -v
 
 `.github/workflows/ci.yml` runs on every push and pull request:
 - **Matrix**: Python 3.11 + 3.12
-- **Jobs**: lint (ruff), SAST (bandit), pytest with coverage, pip-audit (blocking on main), gitleaks, trivy container scan, Docker build smoke test
-- **Lightweight**: test job only installs `numpy pandas scikit-learn pytest ruff bandit` (skips heavy ML deps - the test suite exercises pure-Python backtest + CV logic only)
+- **Jobs**: lint (ruff), SAST (bandit), pytest with coverage, ML import smoke test (CPU tensorflow/torch/optuna/transformers/shap), pip-audit (blocking on main), gitleaks, trivy container scan, Docker build smoke test
+- **Lightweight**: test job only installs `numpy pandas scikit-learn pytest pytest-cov ruff bandit requests` (skips heavy ML deps; `requests` is needed because `tests/test_sentiment_alert.py` imports `scripts/sentiment_alert.py`)
 - **SARIF**: trivy + gitleaks results uploaded to the GitHub Security tab
 
 [![CI](https://github.com/Kinz-org/btc-llm-sentiment/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Kinz-org/btc-llm-sentiment/actions/workflows/ci.yml)
